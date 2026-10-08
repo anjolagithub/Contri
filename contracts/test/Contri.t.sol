@@ -69,6 +69,17 @@ contract ContriTest is Test {
         assertEq(contri.circlesOf(people[2]).length, 1);
     }
 
+    function test_NamesShowInCircle() public {
+        vm.prank(people[0]);
+        contri.setName("Tolu");
+        uint256 id = _circle(2, D);
+        (, Contri.MemberView[] memory ms) = contri.getCircle(id);
+        assertEq(ms[0].name, "Tolu");
+        assertEq(ms[1].name, "");
+        vm.expectRevert(Contri.InvalidParams.selector);
+        contri.setName("");
+    }
+
     function test_RevertsOnBadParams() public {
         vm.startPrank(people[0]);
         vm.expectRevert(Contri.InvalidParams.selector);
@@ -206,6 +217,11 @@ contract ContriTest is Test {
         assertEq(a, people[3]);
         assertEq(dep, 0);
         assertEq(strikes, 1);
+        uint8[][] memory card = contri.history(id);
+        assertEq(card.length, 2);
+        assertEq(card[0][0], 1);
+        assertEq(card[0][3], 2, "marked as covered by deposit");
+        assertEq(card[1][3], 0);
     }
 
     function test_DefaulterWithNoDepositIsRemovedAndLosesTurn() public {

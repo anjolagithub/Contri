@@ -58,6 +58,10 @@ contract Contri is ERC2771Context, ReentrancyGuard {
     /// @dev paid[circle][round][member]
     mapping(uint256 => mapping(uint256 => mapping(address => bool))) public paid;
     mapping(address => uint256[]) internal _circlesOf;
+    /// @dev covered[circle][round][member]: the deposit paid this member's share for that round
+    mapping(uint256 => mapping(uint256 => mapping(address => bool))) public covered;
+    /// @notice A short display name per address, shown to the rest of the circle.
+    mapping(address => string) public nameOf;
 
     event CircleCreated(uint256 indexed id, address indexed creator, address token, string name, uint256 contribution, uint256 deposit, uint64 period, uint8 size);
     event Joined(uint256 indexed id, address indexed member, uint8 position);
@@ -72,6 +76,7 @@ contract Contri is ERC2771Context, ReentrancyGuard {
     event Finished(uint256 indexed id);
     event Cancelled(uint256 indexed id);
     event DepositWithdrawn(uint256 indexed id, address indexed member, uint256 amount);
+    event NameSet(address indexed account, string name);
 
     error InvalidParams();
     error WrongStatus();
@@ -194,6 +199,7 @@ contract Contri is ERC2771Context, ReentrancyGuard {
                 m.deposit -= c.contribution;
                 m.strikes += 1;
                 paid[id][round][who] = true;
+                covered[id][round][who] = true;
                 c.pot += c.contribution;
                 c.paidCount += 1;
                 emit CoveredByDeposit(id, round, who, c.contribution);
@@ -222,10 +228,18 @@ contract Contri is ERC2771Context, ReentrancyGuard {
         c.token.safeTransfer(who, amount);
     }
 
+    /// @notice Set the name the rest of your circles see. 1 to 32 bytes.
+    function setName(string calldata name) external {
+        if (bytes(name).length == 0 || bytes(name).length > 32) revert InvalidParams();
+        nameOf[_msgSender()] = name;
+        emit NameSet(_msgSender(), name);
+    }
+
     // ---------------------------------------------------------------- views
 
     struct MemberView {
         address account;
+        string name;
         uint128 deposit;
         uint8 strikes;
         bool removed;
@@ -239,7 +253,23 @@ contract Contri is ERC2771Context, ReentrancyGuard {
         members = new MemberView[](list.length);
         for (uint256 i; i < list.length; ++i) {
             Member storage m = memberOf[id][list[i]];
-            members[i] = MemberView(list[i], m.deposit, m.strikes, m.removed, m.received, paid[id][circle.round][list[i]]);
+            members[i] = MemberView(list[i], nameOf[list[i]], m.deposit, m.strikes, m.removed, m.received, paid[id][circle.round][list[i]]);
+        }
+    }
+
+    /// @notice The contribution card: for each round so far, each member's mark.
+    ///         0 = not paid, 1 = paid, 2 = covered by deposit.
+    function history(uint256 id) external view returns (uint8[][] memory marks) {
+        Circle storage c = _circles[id];
+        address[] storage list = _members[id];
+        uint256 rounds = c.status == Status.Open || c.status == Status.Cancelled ? 0 : uint256(c.round) + 1;
+        marks = new uint8[][](rounds);
+        for (uint256 r; r < rounds; ++r) {
+            marks[r] = new uint8[](list.length);
+            for (uint256 i; i < list.length; ++i) {
+                if (covered[id][r][list[i]]) marks[r][i] = 2;
+                else if (paid[id][r][list[i]]) marks[r][i] = 1;
+            }
         }
     }
 

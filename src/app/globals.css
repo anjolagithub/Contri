@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Bricolage Grotesque Variable", "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+
+  --color-mist: #eef0f6;
+  --color-card: #ffffff;
+  --color-ink: #141833;
+  --color-ink-2: #4a5070;
+  --color-ink-3: #767c9c;
+  --color-rule: #d8dbe7;
+  --color-rule-soft: #e7e9f1;
+
+  --color-indigo: #1f2a6b;
+  --color-indigo-hi: #2c3a8f;
+  --color-indigo-deep: #121a4a;
+  --color-indigo-tint: #e4e7f5;
+
+  --color-marigold: #f2b233;
+  --color-marigold-deep: #8a5a00;
+  --color-marigold-tint: #fdf1d6;
+
+  --color-covered: #9a5b12;
+  --color-covered-tint: #f8ead6;
+  --color-late: #b3302a;
+  --color-late-tint: #f8e2e0;
+  --color-good: #17734f;
+  --color-good-tint: #e0f1e9;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  background: var(--color-mist);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-mist);
+  font-optical-sizing: auto;
+}
+
+.num {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Adire eleko: indigo resist-dye repeat, used only behind the pot. */
+.adire {
+  background-color: var(--color-indigo);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.09' stroke-width='1.6'%3E%3Ccircle cx='14' cy='14' r='9'/%3E%3Ccircle cx='14' cy='14' r='4'/%3E%3Ccircle cx='42' cy='42' r='9'/%3E%3Ccircle cx='42' cy='42' r='4'/%3E%3Cpath d='M34 8l8 8m0-8l-8 8M6 34l8 8m0-8l-8 8'/%3E%3C/g%3E%3Cg fill='%23ffffff' fill-opacity='.08'%3E%3Ccircle cx='42' cy='12' r='1.6'/%3E%3Ccircle cx='12' cy='42' r='1.6'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(120% 90% at 85% 0%, var(--color-indigo-hi) 0%, transparent 60%);
+}
+
+:focus-visible {
+  outline: 2.5px solid var(--color-marigold);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+button:not(:disabled),
+a[href] {
+  cursor: pointer;
+}
+
+/* The one motion moment: an ink stamp landing on your box. */
+@keyframes stamp {
+  0% { transform: scale(1.9) rotate(-18deg); opacity: 0; }
+  60% { transform: scale(0.92) rotate(-8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-8deg); opacity: 1; }
+}
+.stamp-in {
+  animation: stamp 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.sheet-up {
+  animation: sheet-up 0.24s ease-out both;
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.fade-in {
+  animation: fade 0.2s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp-in,
+  .sheet-up,
+  .fade-in {
+    animation: none !important;
+  }
+}
