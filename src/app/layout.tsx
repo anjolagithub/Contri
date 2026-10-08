@@ -1,3 +1,4 @@
+import "@fontsource-variable/geist";
 import "@fontsource-variable/bricolage-grotesque";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1f2a6b",
+  themeColor: "#19205a",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

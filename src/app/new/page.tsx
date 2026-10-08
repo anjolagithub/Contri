@@ -6,6 +6,8 @@ import { ArrowLeft, Minus, Plus } from "@phosphor-icons/react";
 import { Shell } from "@/components/Shell";
 import { isCancel, useApp } from "@/components/AppProvider";
 import { Button, Field, inputCls } from "@/components/ui";
+import { Ring } from "@/components/Ring";
+import { Money } from "@/components/Money";
 import { actions, publicClient } from "@/lib/client";
 import { contriAbi } from "@/lib/abi";
 import { addresses, deployed } from "@/lib/config";
@@ -65,7 +67,7 @@ export default function NewCircle() {
           submit();
         }}
       >
-        <h1 className="text-[1.75rem] font-bold leading-tight tracking-[-0.02em]">Start a circle</h1>
+        <h1 className="display text-[1.85rem] font-bold leading-tight tracking-[-0.03em]">Start a circle</h1>
 
         <Field label="Name" htmlFor="name">
           <input id="name" className={inputCls} value={name} onChange={(e) => setName(e.target.value.slice(0, 48))} placeholder="Friday ajo" autoComplete="off" />
@@ -102,7 +104,7 @@ export default function NewCircle() {
         </Field>
 
         <Field label="People in the circle" hint="Each person collects once, in the order they join. You're first.">
-          <div className="flex items-center justify-between rounded-xl border border-rule bg-card p-1.5">
+          <div className="flex items-center justify-between rounded-2xl bg-card p-1.5 shadow-[inset_0_0_0_1px_var(--color-rule)]">
             <StepBtn label="One fewer person" onClick={() => setSize((s) => Math.max(2, s - 1))} disabled={size <= 2}>
               <Minus className="h-5 w-5" weight="bold" />
             </StepBtn>
@@ -126,16 +128,31 @@ export default function NewCircle() {
           </div>
         </Field>
 
-        <section aria-label="Summary" className="rounded-2xl border border-indigo/15 bg-indigo-tint/60 p-4">
-          <p className="text-[0.95rem] text-ink-2">Each person collects once</p>
-          <p className="num text-[2rem] font-bold leading-tight tracking-tight text-indigo">{valid ? usd(pot) : "$0"}</p>
-          {valid && loc(pot) && <p className="num text-sm text-ink-2">about {loc(pot)}</p>}
-          <ul className="mt-3 space-y-1.5 text-[0.95rem] leading-snug">
+        <section aria-label="Summary" className="adire rounded-[1.5rem] p-5 text-white">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-white/55">Each person collects</p>
+              <Money units={valid ? pot : 0n} className="mt-1 block text-[2.6rem] leading-none" />
+              {valid && loc(pot) && <p className="num mt-1.5 text-sm text-white/55">about {loc(pot)}</p>}
+            </div>
+            <Ring total={size} filled={Array.from({ length: size }, (_, i) => i === 0)} size={76} onDark label={`${size} people`}>
+              <span className="num text-[0.95rem] font-semibold">{size}</span>
+            </Ring>
+          </div>
+          <ul className="mt-4 space-y-2 border-t border-white/10 pt-4 text-[0.93rem] leading-snug text-white/75">
             <li>
-              Everyone puts in <b className="num">{valid ? usd(contribution) : "$0"}</b> every {p.noun}, {size} times.
+              Everyone puts in <b className="num font-semibold text-white">{valid ? usd(contribution) : "$0"}</b> every {p.noun}, {size} times.
             </li>
-            <li>It starts when all {size} people have joined, and ends after {size} rounds.</li>
-            <li>{deposit > 0n ? <>You lock <b className="num">{usd(deposit)}</b> now and get it back at the end.</> : <>No deposit: a late payment can hold up the pot.</>}</li>
+            <li>It starts when all {size} have joined and ends after {size} rounds.</li>
+            <li>
+              {deposit > 0n ? (
+                <>
+                  You lock <b className="num font-semibold text-white">{usd(deposit)}</b> now and get it back at the end.
+                </>
+              ) : (
+                <>No deposit: a late payment can hold up the pot.</>
+              )}
+            </li>
           </ul>
         </section>
 
@@ -154,8 +171,8 @@ function Chip({ on, onClick, children, wide }: { on: boolean; onClick: () => voi
       role="radio"
       aria-checked={on}
       onClick={onClick}
-      className={`min-h-11 rounded-xl border px-3 py-2 text-[0.95rem] font-semibold leading-tight transition-colors ${wide ? "w-full" : "flex-1"} ${
-        on ? "border-indigo bg-indigo text-white" : "border-rule bg-card text-ink hover:border-ink-3"
+      className={`min-h-12 rounded-2xl px-3 py-2 text-[0.95rem] font-semibold leading-tight transition-[background-color,box-shadow,color] duration-150 ${wide ? "w-full" : "flex-1"} ${
+        on ? "bg-indigo text-white shadow-[0_8px_18px_-10px_rgb(13_18_54/0.8)]" : "bg-card text-ink shadow-[inset_0_0_0_1px_var(--color-rule)] hover:shadow-[inset_0_0_0_1px_var(--color-ink-3)]"
       }`}
     >
       {children}

@@ -11,7 +11,7 @@ export function ContributionCard({ c, meIndex }: { c: Circle; meIndex: number })
   const rounds = Array.from({ length: c.size }, (_, r) => r);
   const current = c.status === STATUS.Active ? c.round : -1;
   return (
-    <section aria-labelledby="card" className="rounded-2xl border border-rule bg-card p-4">
+    <section aria-labelledby="card" className="surface p-4">
       <div className="mb-3 space-y-1.5">
         <h2 id="card" className="font-bold">
           Contribution card

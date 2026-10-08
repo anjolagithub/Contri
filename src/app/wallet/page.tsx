@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowSquareOut, Copy, Eye, Key, Drop } from "@phosphor-icons
 import { Shell } from "@/components/Shell";
 import { useApp } from "@/components/AppProvider";
 import { Avatar, Button, Sheet, inputCls } from "@/components/ui";
+import { Money } from "@/components/Money";
 import { faucet } from "@/lib/client";
 import { chain, EXPLORER, IS_TESTNET, TOKEN_LABEL } from "@/lib/config";
 import { CURRENCIES, local, short, usd, type Currency } from "@/lib/format";
@@ -27,10 +28,10 @@ export default function WalletPage() {
       }
     >
       <div className="space-y-4 pt-1">
-        <h1 className="text-[1.75rem] font-bold leading-tight tracking-[-0.02em]">Wallet</h1>
+        <h1 className="display text-[1.85rem] font-bold leading-tight tracking-[-0.03em]">Wallet</h1>
 
         {!account ? (
-          <section className="rounded-2xl border border-rule bg-card p-5">
+          <section className="surface p-5">
             <p className="text-ink-2">You don&apos;t have a wallet on this phone yet. One is made for you the first time you start or join a circle.</p>
             <Button className="mt-4 w-full" onClick={() => ready().catch(() => {})}>
               Make one now
@@ -38,9 +39,9 @@ export default function WalletPage() {
           </section>
         ) : (
           <>
-            <section className="adire rounded-3xl p-5 text-white">
+            <section className="adire rounded-[1.75rem] p-5 text-white">
               <div className="flex items-center gap-3">
-                <Avatar name={name || "?"} address={account.address} size={40} ring="#f2b233" />
+                <Avatar name={name || "?"} address={account.address} size={40} ring="#e2ae4a" />
                 <div className="min-w-0">
                   <p className="truncate font-bold">{name || "No name yet"}</p>
                   <button
@@ -51,8 +52,8 @@ export default function WalletPage() {
                   </button>
                 </div>
               </div>
-              <p className="mt-5 text-sm text-white/70">Balance</p>
-              <p className="num text-[2.6rem] font-bold leading-none tracking-[-0.03em]">{balance === null ? "…" : usd(balance)}</p>
+              <p className="mt-6 text-[0.8rem] font-medium uppercase tracking-[0.08em] text-white/55">Balance</p>
+              {balance === null ? <p className="text-[2.6rem] leading-none">…</p> : <Money units={balance} className="block text-[2.9rem] leading-none" />}
               {balance !== null && local(balance, rates[currency], currency) && <p className="num mt-1 text-sm text-white/65">about {local(balance, rates[currency], currency)}</p>}
               <p className="mt-3 text-[0.8rem] text-white/60">
                 Held in {TOKEN_LABEL} on {chain.name}. You never need gas: Contri pays it.
@@ -81,7 +82,7 @@ export default function WalletPage() {
               </Button>
             )}
 
-            <section className="rounded-2xl border border-rule bg-card p-4">
+            <section className="surface p-4">
               <label htmlFor="cur" className="font-semibold">
                 Show amounts in
               </label>
@@ -95,7 +96,7 @@ export default function WalletPage() {
               </select>
             </section>
 
-            <section className="rounded-2xl border border-rule bg-card p-4">
+            <section className="surface p-4">
               <p className="flex items-center gap-2 font-semibold">
                 <Key className="h-5 w-5 text-indigo" weight="bold" aria-hidden /> Back up this wallet
               </p>

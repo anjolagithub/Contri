@@ -16,7 +16,7 @@ export function Shell({ children, back }: { children: React.ReactNode; back?: Re
         {account && (
           <Link
             href="/wallet"
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-rule bg-card px-3.5 text-sm font-semibold text-ink hover:border-ink-3"
+            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-card px-3.5 text-sm font-semibold text-ink shadow-[var(--shadow-soft),inset_0_0_0_1px_rgb(14_17_36/0.06)] hover:shadow-[var(--shadow-lift)]"
             aria-label="Your wallet"
           >
             <Wallet className="h-4 w-4 text-indigo" weight="bold" aria-hidden />

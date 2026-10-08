@@ -5,6 +5,7 @@ import { ArrowRight, CaretRight, LinkSimple, Lightning, ShieldCheck, Users } fro
 import { Shell } from "@/components/Shell";
 import { useApp } from "@/components/AppProvider";
 import { Avatar, Button, Mark } from "@/components/ui";
+import { Ring } from "@/components/Ring";
 import { useMyCircles, useNow } from "@/lib/hooks";
 import { headline, potSize } from "@/lib/circle";
 import { periodNoun, usd } from "@/lib/format";
@@ -20,7 +21,7 @@ export default function Home() {
       {has ? (
         <section aria-labelledby="mine" className="space-y-4 pt-2">
           <div className="flex items-end justify-between">
-            <h1 id="mine" className="text-[1.75rem] font-bold leading-tight tracking-[-0.02em]">
+            <h1 id="mine" className="display text-[1.85rem] font-bold leading-tight tracking-[-0.03em]">
               Your circles
             </h1>
             <Button href="/new" variant="quiet" className="!min-h-10 !px-3 text-[0.95rem]">
@@ -53,20 +54,29 @@ function CircleTile({ c }: { c: Circle }) {
     late: "bg-late-tint text-late",
   }[h.tone];
   return (
-    <Link href={`/c/${c.id}`} className="group block rounded-2xl border border-rule bg-card p-4 transition-colors hover:border-ink-3">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-lg font-bold tracking-tight">{c.name}</p>
+    <Link href={`/c/${c.id}`} className="surface group block p-4 transition-shadow hover:shadow-[var(--shadow-lift)]">
+      <div className="flex items-center gap-3.5">
+        <Ring
+          total={c.status === 0 ? c.size : c.members.length}
+          filled={c.status === 0 ? Array.from({ length: c.size }, (_, i) => i < c.members.length) : c.members.map((m) => (c.status === 1 ? m.paidThisRound : m.received))}
+          size={48}
+          stroke={4.5}
+          label={c.status === 0 ? "Members joined" : "Paid this round"}
+        >
+          <span className="num text-[0.78rem] font-semibold text-ink-2">{c.status === 1 ? `R${c.round + 1}` : `${c.members.length}/${c.size}`}</span>
+        </Ring>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[1.1rem] font-semibold tracking-[-0.015em]">{c.name}</p>
           <p className="num text-[0.95rem] text-ink-2">
             {usd(c.contribution)} every {periodNoun(c.period)} · pot {usd(potSize(c) || c.contribution * BigInt(c.size))}
           </p>
         </div>
-        <CaretRight className="mt-1.5 h-5 w-5 shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5" weight="bold" aria-hidden />
+        <CaretRight className="h-5 w-5 shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5" weight="bold" aria-hidden />
       </div>
       <div className="mt-3 flex items-center justify-between gap-3">
         <div className="flex -space-x-2">
           {c.members.slice(0, 6).map((m) => (
-            <Avatar key={m.account} name={m.name} address={m.account} size={28} />
+            <Avatar key={m.account} name={m.name} address={m.account} size={28} stacked />
           ))}
         </div>
         <span className={`rounded-full px-2.5 py-1 text-[0.8rem] font-semibold ${tone}`}>{h.text}</span>
@@ -79,9 +89,9 @@ function Welcome({ loading }: { loading: boolean }) {
   if (loading) return <div className="mt-4 h-64 animate-pulse rounded-3xl bg-card" aria-label="Loading your circles" />;
   return (
     <div className="space-y-6 pt-2">
-      <section className="adire relative overflow-hidden rounded-3xl px-5 pb-6 pt-7 text-white">
-        <h1 className="max-w-[17ch] text-[2.35rem] font-bold leading-[1.02] tracking-[-0.035em]">Your ajo, without the alajo.</h1>
-        <p className="mt-3 max-w-[32ch] text-[1.05rem] leading-snug text-white/80">
+      <section className="adire relative overflow-hidden rounded-[1.75rem] px-5 pb-5 pt-8 text-white">
+        <h1 className="display max-w-[15ch] text-[2.6rem] font-bold leading-[0.98] tracking-[-0.045em]">Your ajo, without the alajo.</h1>
+        <p className="mt-3.5 max-w-[30ch] text-[1.05rem] leading-snug text-white/70">
           Everyone puts in. One person collects each round. Nobody holds the money.
         </p>
         <div className="mt-6 flex flex-col gap-2.5">
@@ -96,10 +106,10 @@ function Welcome({ loading }: { loading: boolean }) {
       </section>
 
       <section aria-labelledby="how" className="space-y-3">
-        <h2 id="how" className="px-1 text-lg font-bold tracking-tight">
+        <h2 id="how" className="display px-1 text-[1.2rem] font-bold tracking-[-0.02em]">
           How it works
         </h2>
-        <ol className="divide-y divide-rule-soft rounded-2xl border border-rule bg-card">
+        <ol className="surface divide-y divide-rule-soft">
           {[
             ["Set it up", "Pick the amount, how often, and who's in. Share one link on WhatsApp."],
             ["Everyone pays", "The moment the last person pays, the pot goes straight to that round's person."],
@@ -117,15 +127,15 @@ function Welcome({ loading }: { loading: boolean }) {
       </section>
 
       <ul className="grid grid-cols-3 gap-2 text-center text-[0.8rem] font-medium text-ink-2">
-        <li className="rounded-2xl bg-card px-2 py-3">
+        <li className="surface !rounded-2xl px-2 py-3.5">
           <Lightning className="mx-auto mb-1 h-5 w-5 text-indigo" weight="duotone" aria-hidden />
           Paid out in under a second
         </li>
-        <li className="rounded-2xl bg-card px-2 py-3">
+        <li className="surface !rounded-2xl px-2 py-3.5">
           <ShieldCheck className="mx-auto mb-1 h-5 w-5 text-indigo" weight="duotone" aria-hidden />
           No one can run with the money
         </li>
-        <li className="rounded-2xl bg-card px-2 py-3">
+        <li className="surface !rounded-2xl px-2 py-3.5">
           <Users className="mx-auto mb-1 h-5 w-5 text-indigo" weight="duotone" aria-hidden />
           No gas, no seed phrase
         </li>
@@ -144,7 +154,7 @@ function SampleCard() {
     [1, 0, 1, 1, 0],
   ];
   return (
-    <div className="mt-6 rounded-2xl bg-card p-3.5 text-ink shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)]" aria-hidden>
+    <div className="mt-6 rotate-[-1.2deg] rounded-[1.1rem] bg-card p-3.5 text-ink shadow-[0_24px_50px_-18px_rgba(0,0,0,0.6)]" aria-hidden>
       <div className="mb-2.5 flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-sm font-bold">
           <Mark size={16} /> Friday ajo

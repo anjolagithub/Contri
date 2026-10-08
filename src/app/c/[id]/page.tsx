@@ -18,6 +18,8 @@ import { Shell } from "@/components/Shell";
 import { isCancel, useApp } from "@/components/AppProvider";
 import { ContributionCard } from "@/components/ContributionCard";
 import { Avatar, Button } from "@/components/ui";
+import { Ring } from "@/components/Ring";
+import { Money } from "@/components/Money";
 import { actions } from "@/lib/client";
 import { addresses, EXPLORER, IS_TESTNET } from "@/lib/config";
 import { useCircle, useNow } from "@/lib/hooks";
@@ -85,68 +87,91 @@ function CircleView({ c, refresh, isNew }: { c: Circle; refresh: () => Promise<v
 function PotBand({ c, now, meIndex, loc }: { c: Circle; now: number; meIndex: number; loc: (u: bigint) => string | null }) {
   const r = recipient(c);
   const full = potSize(c);
-  const pct = full > 0n ? Number((c.pot * 100n) / full) : 0;
+  const paidFlags = c.members.map((m) => m.paidThisRound && !m.removed);
+  const chip = (
+    <span className="num shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[0.78rem] font-medium text-white/85 shadow-[inset_0_0_0_1px_rgb(255_255_255/0.1)]">
+      {c.status === STATUS.Open && `${c.members.length} of ${c.size} joined`}
+      {c.status === STATUS.Active && `Round ${c.round + 1} of ${c.size}`}
+      {c.status === STATUS.Done && "Finished"}
+      {c.status === STATUS.Cancelled && "Called off"}
+    </span>
+  );
   return (
-    <section className="adire overflow-hidden rounded-3xl px-5 pb-5 pt-5 text-white" aria-label="Pot">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="min-w-0 truncate text-[1.35rem] font-bold tracking-tight">{c.name}</h1>
-        <span className="num shrink-0 rounded-full bg-white/12 px-2.5 py-1 text-[0.8rem] font-semibold">
-          {c.status === STATUS.Open && `${c.members.length} of ${c.size} joined`}
-          {c.status === STATUS.Active && `Round ${c.round + 1} of ${c.size}`}
-          {c.status === STATUS.Done && "Finished"}
-          {c.status === STATUS.Cancelled && "Called off"}
-        </span>
+    <section className="adire overflow-hidden rounded-[1.75rem] text-white" aria-label="Pot">
+      <div className="flex items-center justify-between gap-3 px-5 pt-5">
+        <h1 className="display min-w-0 truncate text-[1.3rem] font-bold tracking-[-0.02em]">{c.name}</h1>
+        {chip}
       </div>
 
       {c.status === STATUS.Active && r && (
         <>
-          <p className="mt-5 text-sm text-white/70">In the pot</p>
-          <p className="num text-[2.9rem] font-bold leading-none tracking-[-0.03em]">
-            {usd(c.pot)}
-            <span className="text-[1.15rem] font-semibold text-white/60"> of {usd(full)}</span>
-          </p>
-          {loc(c.pot) && <p className="num mt-1 text-sm text-white/65">about {loc(c.pot)}</p>}
-          <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/15" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Pot filled">
-            <div className="h-full rounded-full bg-marigold transition-[width] duration-500" style={{ width: `${pct}%` }} />
-          </div>
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <Avatar name={r.name} address={r.account} size={34} ring="#f2b233" />
-              <p className="min-w-0 truncate text-[0.95rem]">
-                <b>{meIndex === c.round ? "You collect" : `${r.name || short(r.account)} collects`}</b>
-                <span className="text-white/70"> this round</span>
+          <div className="flex items-center justify-between gap-4 px-5 pb-5 pt-4">
+            <div className="min-w-0">
+              <p className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-white/55">In the pot</p>
+              <Money units={c.pot} className="mt-1 block text-[3.1rem] leading-[0.95]" />
+              <p className="num mt-1.5 text-[0.9rem] text-white/60">
+                of {usd(full)}
+                {loc(c.pot) && <span className="text-white/45"> · {loc(c.pot)}</span>}
               </p>
             </div>
-            <p className={`num flex shrink-0 items-center gap-1 text-sm font-semibold ${now > c.deadline ? "text-marigold" : "text-white/80"}`}>
-              <HourglassMedium className="h-4 w-4" weight="bold" aria-hidden />
-              {now > c.deadline ? "Closed" : until(c.deadline, now)}
+            <Ring
+              total={c.members.length}
+              filled={paidFlags}
+              size={108}
+              onDark
+              label={`${c.paidCount} of ${c.activeCount} have paid this round`}
+            >
+              <div className="flex flex-col items-center">
+                <Avatar name={r.name} address={r.account} size={46} />
+                <span className="num mt-1 text-[0.72rem] font-semibold text-white/75">
+                  {c.paidCount}/{c.activeCount} paid
+                </span>
+              </div>
+            </Ring>
+          </div>
+          <div className="flex items-center justify-between gap-3 border-t border-white/10 bg-black/10 px-5 py-3.5">
+            <p className="min-w-0 truncate text-[0.95rem]">
+              <b className="font-semibold">{meIndex === c.round ? "You collect" : `${r.name || short(r.account)} collects`}</b>
+              <span className="text-white/60"> this round</span>
+            </p>
+            <p className={`num flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.82rem] font-semibold ${now > c.deadline ? "bg-marigold text-indigo-deep" : "bg-white/10 text-white/85"}`}>
+              <HourglassMedium className="h-3.5 w-3.5" weight="bold" aria-hidden />
+              {now > c.deadline ? "Round closed" : until(c.deadline, now)}
             </p>
           </div>
         </>
       )}
 
       {c.status === STATUS.Open && (
-        <>
-          <p className="mt-5 text-sm text-white/70">Each person collects</p>
-          <p className="num text-[2.9rem] font-bold leading-none tracking-[-0.03em]">{usd(c.contribution * BigInt(c.size))}</p>
-          <p className="mt-2 text-[0.95rem] text-white/75">
-            <span className="num">{usd(c.contribution)}</span> each, every {periodNoun(c.period)}. Starts when {c.size - c.members.length} more{" "}
-            {c.size - c.members.length === 1 ? "person joins" : "people join"}.
-          </p>
-          <div className="mt-4 flex gap-1.5" aria-hidden>
-            {Array.from({ length: c.size }).map((_, i) => (
-              <span key={i} className={`h-2 flex-1 rounded-full ${i < c.members.length ? "bg-marigold" : "bg-white/15"}`} />
-            ))}
+        <div className="flex items-center justify-between gap-4 px-5 pb-5 pt-4">
+          <div className="min-w-0">
+            <p className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-white/55">Each person collects</p>
+            <Money units={c.contribution * BigInt(c.size)} className="mt-1 block text-[3.1rem] leading-[0.95]" />
+            <p className="mt-2 text-[0.92rem] leading-snug text-white/65">
+              <span className="num">{usd(c.contribution)}</span> every {periodNoun(c.period)}. Starts when {c.size - c.members.length} more{" "}
+              {c.size - c.members.length === 1 ? "person joins" : "people join"}.
+            </p>
           </div>
-        </>
+          <Ring total={c.size} filled={Array.from({ length: c.size }, (_, i) => i < c.members.length)} size={96} onDark label={`${c.members.length} of ${c.size} joined`}>
+            <span className="num text-[1.15rem] font-semibold">
+              {c.members.length}
+              <span className="text-white/50">/{c.size}</span>
+            </span>
+          </Ring>
+        </div>
       )}
 
       {c.status === STATUS.Done && (
-        <p className="mt-5 text-[1.05rem] text-white/85">
-          Every round has paid out. {c.members.filter((m) => m.received).length} of {c.members.length} members collected.
-        </p>
+        <div className="flex items-center justify-between gap-4 px-5 pb-5 pt-4">
+          <p className="text-[1.02rem] leading-snug text-white/85">
+            Every round has paid out. {c.members.filter((m) => m.received).length} of {c.members.length} members collected.
+          </p>
+          <Ring total={c.size} filled={c.members.map((m) => m.received)} size={84} onDark label="All rounds finished">
+            <span className="text-[0.8rem] font-semibold text-white/80">Done</span>
+          </Ring>
+        </div>
       )}
-      {c.status === STATUS.Cancelled && <p className="mt-5 text-[1.05rem] text-white/85">This circle never filled and was called off. Deposits can be withdrawn.</p>}
+      {c.status === STATUS.Cancelled && <p className="px-5 pb-5 pt-4 text-[1.02rem] text-white/85">This circle never filled and was called off. Deposits can be withdrawn.</p>}
     </section>
   );
 }
@@ -252,7 +277,7 @@ function ActionPanel({ c, now, refresh }: { c: Circle; now: number; refresh: () 
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-[0.95rem] text-ink-2">Your payment for round {c.round + 1}</p>
-            <p className="num text-[1.9rem] font-bold leading-tight tracking-tight">{usd(c.contribution)}</p>
+            <Money units={c.contribution} className="block text-[2.1rem] leading-tight" />
             {loc(c.contribution) && <p className="num text-sm text-ink-2">about {loc(c.contribution)}</p>}
           </div>
           <p className="num pb-1 text-sm text-ink-2">due {dateLabel(c.deadline, c.period)}</p>
@@ -296,7 +321,7 @@ function ActionPanel({ c, now, refresh }: { c: Circle; now: number; refresh: () 
     return (
       <Panel tone="turn">
         <p className="font-semibold">Your deposit is ready</p>
-        <p className="num text-[1.9rem] font-bold leading-tight tracking-tight">{usd(member.deposit)}</p>
+        <Money units={member.deposit} className="block text-[2.1rem] leading-tight" />
         <Button variant="primary" className="mt-3 w-full" busy={busy === "withdraw"} onClick={() => run("withdraw", async () => actions.withdraw(await ready(), c.id), "Deposit is back in your wallet.")}>
           Withdraw deposit
         </Button>
@@ -317,8 +342,8 @@ function ActionPanel({ c, now, refresh }: { c: Circle; now: number; refresh: () 
 }
 
 function Panel({ children, tone }: { children: React.ReactNode; tone?: "turn" | "late" }) {
-  const cls = tone === "turn" ? "border-marigold/60 bg-marigold-tint/70" : tone === "late" ? "border-late/25 bg-late-tint/60" : "border-rule bg-card";
-  return <section className={`rounded-2xl border p-4 ${cls}`}>{children}</section>;
+  const cls = tone === "turn" ? "bg-marigold-tint shadow-[inset_0_0_0_1px_rgb(226_174_74/0.45)]" : tone === "late" ? "bg-late-tint shadow-[inset_0_0_0_1px_rgb(179_48_42/0.2)]" : "surface";
+  return <section className={`rounded-[1.25rem] p-4 ${cls}`}>{children}</section>;
 }
 
 function inviteUrl(c: Circle) {
@@ -376,7 +401,7 @@ function NudgeButton({ c }: { c: Circle }) {
 
 function Order({ c, meIndex, now }: { c: Circle; meIndex: number; now: number }) {
   return (
-    <section aria-labelledby="order" className="rounded-2xl border border-rule bg-card">
+    <section aria-labelledby="order" className="surface">
       <h2 id="order" className="px-4 pb-1 pt-3.5 font-bold">
         Who collects when
       </h2>
@@ -402,7 +427,7 @@ function Order({ c, meIndex, now }: { c: Circle; meIndex: number; now: number })
           return (
             <li key={m.account} className={`flex items-center gap-3 px-4 py-3 ${current ? "bg-marigold-tint/50" : ""}`}>
               <span className="num w-5 text-center text-sm font-semibold text-ink-3">{i + 1}</span>
-              <Avatar name={m.name} address={m.account} size={36} ring={current ? "#f2b233" : undefined} />
+              <Avatar name={m.name} address={m.account} size={36} ring={current ? "#e2ae4a" : undefined} />
               <div className="min-w-0 flex-1">
                 <p className={`truncate font-semibold ${m.removed ? "text-ink-3 line-through" : ""}`}>
                   {m.name || short(m.account)}
@@ -477,7 +502,7 @@ function Details({ c }: { c: Circle }) {
     ],
   ];
   return (
-    <section aria-label="Circle rules" className="rounded-2xl border border-rule bg-card px-4 py-1.5">
+    <section aria-label="Circle rules" className="surface px-4 py-1.5">
       <dl className="divide-y divide-rule-soft">
         {rows.map(([k, v]) => (
           <div key={k} className="flex items-center justify-between gap-3 py-2.5 text-[0.95rem]">
