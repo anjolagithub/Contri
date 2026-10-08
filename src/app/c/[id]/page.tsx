@@ -255,7 +255,11 @@ function ActionPanel({ c, now, refresh }: { c: Circle; now: number; refresh: () 
       <Panel tone="late">
         <p className="font-semibold">This round has closed</p>
         <p className="mt-1 text-[0.95rem] text-ink-2">
-          {unpaid.length} {unpaid.length === 1 ? "member hasn't" : "members haven't"} paid. Anyone can settle it: deposits cover the missing payments, then the pot goes out.
+          {member && !member.paidThisRound && !member.removed
+            ? unpaid.length === 1
+              ? "You're the only one who hasn't paid. Pay now, or settle and your deposit covers it."
+              : `You and ${unpaid.length - 1} other${unpaid.length > 2 ? "s" : ""} haven't paid. Pay now, or settle and deposits cover it.`
+            : `${unpaid.length} ${unpaid.length === 1 ? "member hasn't" : "members haven't"} paid. Anyone can settle it: deposits cover the missing payments, then the pot goes out.`}
         </p>
         <div className="mt-3 flex gap-2">
           {member && !member.paidThisRound && !member.removed && (
@@ -264,7 +268,7 @@ function ActionPanel({ c, now, refresh }: { c: Circle; now: number; refresh: () 
             </Button>
           )}
           <Button variant="primary" className="flex-1" busy={busy === "settle"} onClick={() => run("settle", async () => actions.settle(await ready(), c.id), "Round settled.")}>
-            Settle the round
+            Settle round
           </Button>
         </div>
       </Panel>

@@ -23,6 +23,7 @@ export function Ring({
   label: string;
 }) {
   const sw = stroke ?? Math.max(3, Math.round(size * 0.075));
+  const f = (n: number) => Math.round(n * 100) / 100; // identical output on server and client
   const r = (size - sw) / 2 - 1;
   const c = size / 2;
   const gap = total > 1 ? Math.min(0.22, 2.6 / total) : 0; // radians between arcs
@@ -34,12 +35,12 @@ export function Ring({
         {Array.from({ length: total }).map((_, i) => {
           const a0 = -Math.PI / 2 + i * seg + gap / 2;
           const a1 = a0 + seg - gap;
-          const x0 = c + r * Math.cos(a0);
-          const y0 = c + r * Math.sin(a0);
-          const x1 = c + r * Math.cos(a1);
-          const y1 = c + r * Math.sin(a1);
+          const x0 = f(c + r * Math.cos(a0));
+          const y0 = f(c + r * Math.sin(a0));
+          const x1 = f(c + r * Math.cos(a1));
+          const y1 = f(c + r * Math.sin(a1));
           const large = a1 - a0 > Math.PI ? 1 : 0;
-          const d = total === 1 ? `M ${c} ${c - r} A ${r} ${r} 0 1 1 ${c - 0.01} ${c - r}` : `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
+          const d = total === 1 ? `M ${f(c)} ${f(c - r)} A ${f(r)} ${f(r)} 0 1 1 ${f(c - 0.01)} ${f(c - r)}` : `M ${x0} ${y0} A ${f(r)} ${f(r)} 0 ${large} 1 ${x1} ${y1}`;
           return <path key={i} d={d} fill="none" strokeLinecap="round" strokeWidth={sw} stroke={filled[i] ? "var(--color-marigold)" : empty} className="ring-seg" />;
         })}
       </svg>
