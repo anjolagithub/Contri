@@ -89,12 +89,12 @@ function Welcome({ loading }: { loading: boolean }) {
   if (loading) return <div className="mt-4 h-64 animate-pulse rounded-3xl bg-card" aria-label="Loading your circles" />;
   return (
     <div className="space-y-6 pt-2">
-      <section className="adire relative overflow-hidden rounded-[1.75rem] px-5 pb-5 pt-8 text-white">
-        <h1 className="display max-w-[15ch] text-[2.6rem] font-bold leading-[0.98] tracking-[-0.045em]">Your ajo, without the alajo.</h1>
-        <p className="mt-3.5 max-w-[30ch] text-[1.05rem] leading-snug text-white/70">
+      <section className="adire relative overflow-hidden rounded-[1.75rem] px-5 pb-5 pt-8 text-white lg:pt-5">
+        <h1 className="display max-w-[15ch] lg:sr-only text-[2.6rem] font-bold leading-[0.98] tracking-[-0.045em]">Your ajo, without the alajo.</h1>
+        <p className="mt-3.5 max-w-[30ch] text-[1.05rem] leading-snug text-white/70 lg:hidden">
           Everyone puts in. One person collects each round. Nobody holds the money.
         </p>
-        <div className="mt-6 flex flex-col gap-2.5">
+        <div className="mt-6 flex flex-col gap-2.5 lg:mt-0">
           <Button href="/new" variant="marigold" className="w-full">
             Start a circle <ArrowRight className="h-5 w-5" weight="bold" aria-hidden />
           </Button>
